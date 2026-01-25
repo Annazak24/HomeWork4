@@ -13,15 +13,10 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.events.EventFiringDecorator;
 
-public class UiExtensions implements BeforeEachCallback, BeforeAllCallback, AfterEachCallback {
+public class UiExtensions implements BeforeEachCallback, AfterEachCallback {
 
    private WebDriver driver;
    private final WebDriverFactory webDriverFactory = new WebDriverFactory();
-
-   @Override
-   public void beforeAll(ExtensionContext context) {
-      webDriverFactory.init();
-   }
 
    @Override
    public void beforeEach(ExtensionContext context) {
