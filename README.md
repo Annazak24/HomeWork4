@@ -1,58 +1,62 @@
-# UI Automated Testing Project for OTUS
+# Homework #4: Selenoid & Citrus Integration
 
-## Overview
-Automated UI tests for the OTUS learning platform (https://otus.ru) using Selenium WebDriver with Java. Implements Page Object Model with Google Guice DI.
+This project demonstrates a production-grade test automation setup using **Selenoid** for browser orchestration, **Citrus Framework** for integration testing, and **Chrome Mobile Emulation**.
 
-## Technology Stack
-- Java 24
-- Selenium WebDriver 4.36.0
-- JUnit Jupiter 5.10.2
-- WebDriverManager 6.3.2
-- Google Guice 7.0.0
-- AssertJ 3.27.6
-- JSoup 1.17.2
-- Maven 3.14.0
+## Prerequisites
+Before running the tests, ensure you have the following installed:
+* **Docker** & **Docker Desktop**
+* **Java 17+** (OpenJDK 25 used in development)
+* **Maven**
 
-## Project Structure
-```
-project/
-├── src/
-│   ├── main/java/
-│   │   ├── pages/         # Page Object classes
-│   │   ├── extensions/    # JUnit extensions
-│   │   ├── annotations/   # Custom annotations
-│   │   ├── dto/           # Data Transfer Objects
-│   │   └── waiters/       # Custom wait conditions
-│   └── test/java/
-│       └── otus/          # Test scenarios
-└── pom.xml
-```
+---
 
-## Test Scenarios
-1. **scenario1** — Verify course search by exact name
-2. **scenario2** — Find earliest and latest courses
-3. **scenario3** — Navigate categories and validate selection
+## 1. Selenoid Configuration and Launch
 
-## Setup and Configuration
+The project includes a `selenoid` directory in the root folder containing the `browsers.json` configuration.
 
-### Prerequisites
-- JDK 24
-- Maven 3.x
-- Chrome browser (default)
+### Start Selenoid Hub
+Open your terminal (PowerShell or Bash) in the project root and run:
 
-### Configuration Properties
-In `pom.xml`:
-- `base.url` (default: https://otus.ru)
-- `browser.name` (default: chrome)
+```powershell
+docker run -d                                   `
+    --name selenoid                             `
+    -p 4444:4444                                `
+    -v //var/run/docker.sock:/var/run/docker.sock `
+    -v "${PWD}/selenoid:/etc/selenoid:ro"       `
+    aerokube/selenoid:latest-release
+Start Selenoid UI (Optional)
+To visualize the test execution in real-time via VNC:
 
-## Running Tests
-```bash
-# all tests
-mvn clean test
+PowerShell
+docker run -d           `
+    --name selenoid-ui  `
+    -p 8080:8080        `
+    --link selenoid     `
+    aerokube/selenoid-ui:latest-release --selenoid-uri http://selenoid:4444
+2. Running the Tests
+The tests can be executed via IntelliJ IDEA or using Maven.
 
-# with profile
-mvn clean test -Pprod
+To run via Maven in Remote (Selenoid) mode:
 
-# specific test
-mvn clean test -Dtest=scenario1
-```
+Bash
+mvn test -Drun.type=remote -Dbrowser.name=chrome
+3. Project Implementation Details
+Selenoid Hub: The WebDriverFactory connects to the hub at http://localhost:4444/wd/hub.
+
+Citrus Framework: Tests are integrated with CitrusExtension to leverage Citrus's validation and reporting capabilities.
+
+Mobile Emulation: The factory applies Chrome Mobile Emulation using the Nexus 5 device profile, fulfilling the mobile testing requirement.
+
+Stability: A sessionTimeout of 15 minutes is configured to ensure the Selenoid session remains active during the initial setup phase.
+
+4. Performance Note
+You may notice a slight delay during the startup of the tests. This is a known technical trade-off caused by the initialization of two separate Dependency Injection systems:
+
+Citrus Context: Initializes heavy reporting and coordination beans.
+
+Google Guice: Manages the injection of Page Objects and WebDriver instances.
+
+The combination of these frameworks provides high modularity and powerful validation but requires extra time for the Application Context to load. The environment has been optimized with increased timeouts to ensure reliability.
+
+5. Visualizing Tests
+Once the tests start, you can navigate to http://localhost:8080 to see the mobile browser emulation in action via the VNC console.
