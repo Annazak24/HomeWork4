@@ -1,83 +1,106 @@
-Homework #4: Selenoid & Citrus Integration
+# Homework #4: Selenoid & Citrus Integration
 
-This project demonstrates a production-grade test automation setup using Selenoid for browser orchestration, Citrus Framework for integration testing, and Chrome Mobile Emulation.
+This project demonstrates a production-grade test automation setup using **Selenoid** for browser orchestration, **Citrus Framework** for integration testing, and **Chrome Mobile Emulation**.
 
-Prerequisites
+---
 
-Before running the tests, ensure you have the following installed:
+## Prerequisites
 
-Docker & Docker Desktop
+Before running the project, ensure the following are installed:
 
-Java 17+ (OpenJDK 25 was used during development)
+- Docker & Docker Desktop
+- Java 17+ (OpenJDK 25 was used during development)
+- Maven
 
-Maven
+---
 
-1. Selenoid Configuration and Launch
+## Selenoid Configuration
 
-The project includes a selenoid directory in the project root that contains the browsers.json configuration file.
+Selenoid-related configuration is located in the project root:
 
-Start Selenoid Hub
+- `selenoid/browsers.json` — browser configuration for Selenoid  
+- `docker-compose.yml` — **playbook for Selenoid deployment**
 
-Open your terminal (PowerShell or Bash) in the project root and run:
+---
 
-docker run -d `
-    --name selenoid `
-    -p 4444:4444 `
-    -v //var/run/docker.sock:/var/run/docker.sock `
-    -v "${PWD}/selenoid:/etc/selenoid:ro" `
-    aerokube/selenoid:latest-release
+## Selenoid Setup and Launch (Recommended)
 
-Start Selenoid UI (Optional)
+Selenoid and Selenoid UI are deployed using **Docker Compose**.
 
-To visualize test execution in real time via VNC, run:
+From the project root, run:
 
-docker run -d `
-    --name selenoid-ui `
-    -p 8080:8080 `
-    --link selenoid `
-    aerokube/selenoid-ui:latest-release --selenoid-uri http://selenoid:4444
+```bash
+docker-compose up -d
+```
 
-2. Running the Tests
+### Verify Selenoid is running
 
-Tests can be executed either via IntelliJ IDEA or using Maven.
+Open the following URLs in your browser:
 
-Run tests via Maven in Remote (Selenoid) mode:
+- http://localhost:4444/status — Selenoid status
+- http://localhost:8080 — Selenoid UI (VNC)
+
+---
+
+## Alternative: Manual Selenoid Startup (Optional)
+
+If Docker Compose is not used, Selenoid can be started manually:
+
+```bash
+docker run -d   --name selenoid   -p 4444:4444   -v /var/run/docker.sock:/var/run/docker.sock   -v "${PWD}/selenoid:/etc/selenoid:ro"   aerokube/selenoid:latest-release
+```
+
+---
+
+## Running the Tests
+
+Tests can be executed via **IntelliJ IDEA** or **Maven**.
+
+### Run tests using Maven in remote (Selenoid) mode
+
+```bash
 mvn test -Drun.type=remote -Dbrowser.name=chrome
+```
 
-3. Project Implementation Details
+---
 
-Selenoid Hub
-WebDriverFactory connects to the hub at:
+## Project Implementation Details
+
+### Selenoid Integration
+WebDriver instances connect to Selenoid Hub at:
+
+```
 http://localhost:4444/wd/hub
+```
 
-Citrus Framework
-Tests are integrated using CitrusExtension, enabling advanced validation, reporting, and test orchestration.
+### Citrus Framework
+Tests are implemented using `CitrusExtension`, enabling advanced validation, reporting, and test orchestration.
 
-Mobile Emulation
-Chrome Mobile Emulation is configured using the Nexus 5 device profile to satisfy mobile testing requirements.
+### Mobile Testing
+Chrome Mobile Emulation is configured using the **Nexus 5** device profile to satisfy mobile browser testing requirements.
 
-Stability
-A sessionTimeout of 15 minutes is configured to ensure the Selenoid session remains active during the initialization phase.
+### Stability Configuration
+Selenoid session timeouts are configured to ensure stable execution during browser startup and test initialization.
 
-4. Performance Note
+---
 
-You may notice a short delay during test startup.
-This is an expected technical trade-off caused by initializing two Dependency Injection systems:
+## Performance Notes
 
-Citrus Context
-Initializes reporting, validation, and coordination components.
+A short delay during test startup is expected due to initialization of two dependency injection systems:
 
-Google Guice
-Manages dependency injection for Page Objects and WebDriver instances.
+- **Citrus Context** — reporting, validation, and orchestration
+- **Google Guice** — dependency injection for Page Objects and WebDriver instances
 
-This architecture provides high modularity, extensibility, and powerful validation, at the cost of slightly increased startup time.
-Timeouts and configurations have been tuned to ensure stable execution.
+This architecture provides high modularity and extensibility while maintaining stable execution.
 
-5. Visualizing Tests
+---
 
-Once the tests start, open the following URL in your browser to watch execution via VNC:
+## Visualizing Test Execution
 
+Once the tests start, open the following URL to watch execution via VNC:
+
+```
 http://localhost:8080
+```
 
-
-You will see the mobile browser emulation running inside Selenoid UI.
+You will see the mobile browser emulation running inside **Selenoid UI**.
