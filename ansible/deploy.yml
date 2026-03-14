@@ -1,0 +1,7 @@
+---
+- name: Deploy Selenoid infrastructure
+  hosts: local
+  become: false
+
+  roles:
+    - selenoid

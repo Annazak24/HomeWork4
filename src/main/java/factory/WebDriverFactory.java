@@ -6,6 +6,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,9 +33,8 @@ public class WebDriverFactory {
 
 
                 return new RemoteWebDriver(
-                        new URL("http://localhost:4444/wd/hub"),
-                        options
-                );
+                                URI.create("http://localhost:4444/wd/hub").toURL(),
+                                options);
             }
 
             return new ChromeDriver((ChromeOptions) new ChromeSettings().settings());

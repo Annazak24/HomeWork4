@@ -20,7 +20,7 @@ public class CourseTitleCheckingCitrusTest {
     @CitrusTest
     void findCourseByNameTest() {
 
-        String courseName = "Node.js Developer";
+        String courseName = "Team Lead";
 
         catalogPage.open();
         catalogPage.clickCourseByName(courseName);
