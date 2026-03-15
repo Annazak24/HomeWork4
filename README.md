@@ -1,6 +1,6 @@
-# Homework #4: Selenoid & Citrus Integration
+# Homework #4: Selenoid, Ansible & Citrus Integration
 
-This project demonstrates a production-grade test automation setup using **Selenoid** for browser orchestration, **Citrus Framework** for integration testing, and **Chrome Mobile Emulation**.
+This project demonstrates a production-grade test automation setup using **Selenoid** for browser orchestration, **Ansible** for infrastructure provisioning, **Citrus Framework** for integration testing, and **Chrome Mobile Emulation**.
 
 ---
 
@@ -8,46 +8,93 @@ This project demonstrates a production-grade test automation setup using **Selen
 
 Before running the project, ensure the following are installed:
 
-- Docker & Docker Desktop
+- Docker / Docker Desktop
 - Java 17+ (OpenJDK 25 was used during development)
 - Maven
+- Ansible
 
 ---
 
-## Selenoid Configuration
+## Infrastructure as Code
 
-Selenoid-related configuration is located in the project root:
+The project includes **Ansible automation** for preparing and running the Selenoid infrastructure.
 
-- `selenoid/browsers.json` — browser configuration for Selenoid  
-- `docker-compose.yml` — **playbook for Selenoid deployment**
+Main Ansible files:
+
+- `ansible/deploy.yml` — main playbook
+- `ansible/inventory.ini` — inventory configuration
+- `ansible/roles/playbook-selenoid/roles/docker` — Docker installation and setup
+- `ansible/roles/playbook-selenoid/roles/rendering_configs` — generation of Selenoid, GGR, Nginx, and quota configuration files
+- `ansible/roles/playbook-selenoid/roles/docker-compose` — Docker Compose-based container startup and validation
 
 ---
 
-## Selenoid Setup and Launch (Recommended)
+## Generated Infrastructure Files
 
-Selenoid and Selenoid UI are deployed using **Docker Compose**.
+During execution, the playbook generates the required infrastructure files under:
+
+- `/root/selenoid/browsers.json` — browser configuration for Selenoid
+- `/root/selenoid/docker-compose.yaml` — Docker Compose file for infrastructure startup
+- `/root/selenoid/selenoid.conf` — Nginx proxy configuration
+- `/root/selenoid/grid-router/quota/test.xml` — GGR quota configuration
+
+Template files are stored in:
+
+- `ansible/roles/playbook-selenoid/roles/rendering_configs/templates/browsers.json.j2`
+- `ansible/roles/playbook-selenoid/roles/rendering_configs/templates/docker-compose.yml.j2`
+- `ansible/roles/playbook-selenoid/roles/rendering_configs/templates/selenoid.conf.j2`
+- `ansible/roles/playbook-selenoid/roles/rendering_configs/templates/test.xml.j2`
+
+---
+
+## Selenoid Setup and Launch
+
+Selenoid infrastructure is deployed using **Ansible**.
 
 From the project root, run:
 
 ```bash
-docker-compose up -d
+ansible-playbook -K -i ansible/inventory.ini ansible/deploy.yml
 ```
 
-### Verify Selenoid is running
+If the environment already has passwordless sudo configured, the playbook can also be run without `-K`:
 
-Open the following URLs in your browser:
+```bash
+ansible-playbook -i ansible/inventory.ini ansible/deploy.yml
+```
 
-- http://localhost:4444/status — Selenoid status
-- http://localhost:8080 — Selenoid UI (VNC)
+> Note: in some environments Ansible may request a sudo/become password because the playbook performs system-level actions such as Docker installation, service configuration, and writing generated files under privileged locations.
+
+The playbook performs the following steps:
+
+- installs and configures Docker
+- generates all required Selenoid, GGR, and Nginx configuration files
+- creates Docker networks
+- starts the infrastructure using Docker Compose
+- verifies the container state
 
 ---
 
-## Alternative: Manual Selenoid Startup (Optional)
+## Verify Selenoid is Running
 
-If Docker Compose is not used, Selenoid can be started manually:
+Check the Selenoid/GGR endpoint:
 
 ```bash
-docker run -d   --name selenoid   -p 4444:4444   -v /var/run/docker.sock:/var/run/docker.sock   -v "${PWD}/selenoid:/etc/selenoid:ro"   aerokube/selenoid:latest-release
+curl http://localhost/wd/hub/status
+```
+
+Expected result: a JSON response with `"ready": true`.
+
+You can also inspect running containers:
+
+```bash
+docker ps -a
+```
+
+Or check the compose stack directly:
+
+```bash
+docker compose -f /root/selenoid/docker-compose.yaml ps
 ```
 
 ---
@@ -67,14 +114,14 @@ mvn test -Drun.type=remote -Dbrowser.name=chrome
 ## Project Implementation Details
 
 ### Selenoid Integration
-WebDriver instances connect to Selenoid Hub at:
+WebDriver instances connect to Selenoid through **Nginx + GGR** at:
 
-```
-http://localhost:4444/wd/hub
+```text
+http://localhost/wd/hub
 ```
 
 ### Citrus Framework
-Tests are implemented using `CitrusExtension`, enabling advanced validation, reporting, and test orchestration.
+Tests are implemented using `CitrusExtension`, enabling validation, reporting, and test orchestration.
 
 ### Mobile Testing
 Chrome Mobile Emulation is configured using the **Nexus 5** device profile to satisfy mobile browser testing requirements.
@@ -91,16 +138,35 @@ A short delay during test startup is expected due to initialization of two depen
 - **Citrus Context** — reporting, validation, and orchestration
 - **Google Guice** — dependency injection for Page Objects and WebDriver instances
 
-This architecture provides high modularity and extensibility while maintaining stable execution.
+This architecture provides modularity and extensibility while maintaining stable execution.
 
 ---
 
-## Visualizing Test Execution
+## Project Structure
 
-Once the tests start, open the following URL to watch execution via VNC:
+```text
+ansible/
+  deploy.yml
+  inventory.ini
+  roles/playbook-selenoid/roles/
+    docker/
+    docker-compose/
+    rendering_configs/
 
+src/
+pom.xml
+README.md
 ```
-http://localhost:8080
-```
 
-You will see the mobile browser emulation running inside **Selenoid UI**.
+---
+
+## Summary
+
+This homework demonstrates:
+
+- automated infrastructure provisioning with **Ansible**
+- browser orchestration with **Selenoid**
+- request routing through **Nginx + GGR**
+- remote UI test execution with **Selenium / Selenide**
+- integration testing with **Citrus Framework**
+- mobile browser emulation with **Chrome Mobile Emulation**
