@@ -5,5 +5,5 @@
 
   roles:
     - playbook-selenoid/roles/docker
-    - playbook-selenoid/roles/docker-compose
     - playbook-selenoid/roles/rendering_configs
+    - playbook-selenoid/roles/docker-compose

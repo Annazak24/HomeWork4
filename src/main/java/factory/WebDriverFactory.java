@@ -33,14 +33,14 @@ public class WebDriverFactory {
 
 
                 return new RemoteWebDriver(
-                                URI.create("http://localhost:4444/wd/hub").toURL(),
-                                options);
+                        URI.create("http://localhost:80/wd/hub").toURL(),
+                        options);
             }
 
             return new ChromeDriver((ChromeOptions) new ChromeSettings().settings());
 
         } catch (Exception e) {
-            throw new RuntimeException("Չհաջողվեց ստեղծել WebDriver-ը: " + e.getMessage(), e);
+            throw new RuntimeException("Failed to create WebDriver-ը: " + e.getMessage(), e);
         }
     }
 }

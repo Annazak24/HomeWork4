@@ -38,7 +38,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - "{{ selenoid_path }}/selenoid.conf:/etc/nginx/conf.d/selenoid.conf:ro"
+      - "{{ selenoid_path }}/selenoid.conf:/etc/nginx/conf.d/default.conf:ro"
     networks:
       - selenoid1
     depends_on:
