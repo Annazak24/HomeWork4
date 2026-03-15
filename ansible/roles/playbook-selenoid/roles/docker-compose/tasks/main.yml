@@ -1,0 +1,10 @@
+- name: Reset environment for docker compose (safe xargs)
+  shell: docker ps -aq | xargs --no-run-if-empty docker rm -f
+
+- name: Check containers state
+  shell: docker ps
+  register: docker_output
+
+- name: Show running containers
+  debug:
+    var: docker_output.stdout

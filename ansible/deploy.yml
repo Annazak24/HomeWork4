@@ -1,7 +1,9 @@
 ---
 - name: Deploy Selenoid infrastructure
   hosts: local
-  become: false
+  become: true
 
   roles:
-    - selenoid
+    - playbook-selenoid/roles/docker
+    - playbook-selenoid/roles/docker-compose
+    - playbook-selenoid/roles/rendering_configs

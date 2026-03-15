@@ -1,0 +1,7 @@
+server {
+    listen 80 default_server;
+
+    location ~ /wd/hub {
+        proxy_pass http://ggr;
+    }
+}
