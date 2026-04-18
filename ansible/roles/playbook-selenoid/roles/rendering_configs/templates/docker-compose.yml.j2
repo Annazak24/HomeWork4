@@ -1,4 +1,19 @@
 services:
+  registry:
+    image: registry:3.0.0
+    container_name: registry
+    restart: always
+    ports:
+      - "5005:5005"
+    volumes:
+      - registry_data:/var/lib/registry
+    hostname: registry
+    environment:
+      - REGISTRY_HTTP_ADDR=0.0.0.0:5005
+      - OTEL_TRACES_EXPORTER=none
+    networks:
+      - selenoid1
+
   selenoid1:
     image: aerokube/selenoid:1.11.3
     hostname: selenoid1
@@ -43,6 +58,22 @@ services:
       - selenoid1
     depends_on:
       - ggr
+      - jenkins
+
+  jenkins:
+    image: jenkins-jjb:latest
+    container_name: jenkins
+    ports:
+      - "8081:8080"
+      - "50000:50000"
+    environment:
+      - JENKINS_OPTS=--prefix=/my_jenkins
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - selenoid1
 
 networks:
   selenoid1:
@@ -51,3 +82,7 @@ networks:
   selenoid2:
     name: "{{ network2 }}"
     external: true
+
+volumes:
+  jenkins_home:
+  registry_data:

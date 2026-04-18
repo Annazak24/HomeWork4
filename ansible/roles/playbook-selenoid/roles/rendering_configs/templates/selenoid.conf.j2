@@ -1,3 +1,7 @@
+upstream jenkins_up {
+    server jenkins:8080;
+}
+
 server {
     listen 80 default_server;
     server_name _;
@@ -11,6 +15,13 @@ server {
 
     location /wd/hub/ {
         proxy_pass http://ggr:4444/wd/hub/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    location /my_jenkins/ {
+        proxy_pass http://jenkins_up/my_jenkins/;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
