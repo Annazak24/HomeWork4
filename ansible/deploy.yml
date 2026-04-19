@@ -1,7 +1,7 @@
 ---
 - name: Deploy Selenoid infrastructure
   hosts: local
-  become: false
+  become: true
 
   roles:
     - playbook-selenoid/roles/docker
