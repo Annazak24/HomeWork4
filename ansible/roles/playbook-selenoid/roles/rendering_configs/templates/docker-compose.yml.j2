@@ -19,7 +19,7 @@ services:
     container_name: wiremock
     hostname: wiremock
     volumes:
-      - "{{ project_path }}/wiremock:/home/wiremock:ro"
+      - ./wiremock:/home/wiremock:ro
     networks:
       - selenoid1
 
