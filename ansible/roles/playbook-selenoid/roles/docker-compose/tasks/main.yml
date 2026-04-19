@@ -1,3 +1,7 @@
+- name: Copy wiremock folder
+  copy:
+    src: /mnt/c/Users/annaz/IdeaProjects/HomeWork7/wiremock
+    dest: /root/selenoid/
 
 - name: Stop and remove old containers
   shell: docker compose -f /root/selenoid/docker-compose.yaml down --remove-orphans
