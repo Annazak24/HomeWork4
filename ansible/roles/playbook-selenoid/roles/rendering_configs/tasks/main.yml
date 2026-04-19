@@ -40,6 +40,19 @@
     network2: selenoid2
     selenoid_path: /root/selenoid/
 
+- name: Clone mobile project repository
+  git:
+    repo: https://github.com/Annazak24/HomeWork7.git
+    dest: /tmp/HomeWork7
+    version: main
+    force: true
+
+- name: Copy wiremock folder from cloned repo
+  copy:
+    src: /tmp/HomeWork7/wiremock/
+    dest: /root/selenoid/wiremock/
+    remote_src: true
+
 - name: Create grid-router folder
   file:
     path: /root/selenoid/grid-router/quota
