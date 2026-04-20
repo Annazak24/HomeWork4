@@ -1,10 +1,6 @@
-- name: Remove old Docker keys and repo
-  file:
-    path: "{{ item }}"
-    state: absent
-  loop:
-    - /etc/apt/keyrings/docker.asc
-    - /etc/apt/sources.list.d/download_docker_com_linux_ubuntu.list
+- name: Stop and remove all containers
+  shell: docker rm -f $(docker ps -aq) 2>/dev/null || true
+  become: true
 
 - name: Update apt cache
   apt:
