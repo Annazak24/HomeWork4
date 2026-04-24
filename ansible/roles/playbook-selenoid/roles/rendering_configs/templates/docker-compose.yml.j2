@@ -64,7 +64,7 @@ services:
       - "{{ selenoid_path }}/browsers.json:/etc/selenoid/browsers.json:ro"
     command: >
        -conf /etc/selenoid/browsers.json
-       -container-network selenoid1
+       -container-network selenoid2
        -limit 10
     networks:
       - selenoid2
@@ -83,18 +83,18 @@ services:
       - selenoid1
       - selenoid2
 
-    ggr:
-      image: aerokube/ggr:1.7.2
-      hostname: ggr
-      depends_on:
-        - selenoid1
-        - selenoid2
-      volumes:
-        - "{{ selenoid_path }}/grid-router:/etc/grid-router:ro"
-      command: "-listen :4444 -guests-allowed -guests-quota test -verbose"
-      networks:
-        - selenoid1
-        - selenoid2
+  ggr:
+    image: aerokube/ggr:1.7.2
+    hostname: ggr
+    depends_on:
+      - selenoid1
+      - selenoid2
+    volumes:
+      - "{{ selenoid_path }}/grid-router:/etc/grid-router:ro"
+    command: "-listen :4444 -guests-allowed -guests-quota test -verbose"
+    networks:
+      - selenoid1
+      - selenoid2
 
   nginx:
     image: nginx
