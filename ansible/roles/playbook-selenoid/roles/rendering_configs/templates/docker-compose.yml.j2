@@ -62,7 +62,10 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "{{ selenoid_path }}/browsers.json:/etc/selenoid/browsers.json:ro"
-    command: "-container-network selenoid2 -limit 10"
+    command: >
+       -conf /etc/selenoid/browsers.json
+       -container-network selenoid1
+       -limit 10
     networks:
       - selenoid2
 
@@ -80,18 +83,18 @@ services:
       - selenoid1
       - selenoid2
 
-  ggr:
-    image: aerokube/ggr:1.7.2
-    hostname: ggr
-    depends_on:
-      - selenoid1
-      - selenoid2
-    volumes:
-      - "{{ selenoid_path }}/grid-router:/etc/grid-router:ro"
-    command: "-guests-allowed -guests-quota test -verbose"
-    networks:
-      - selenoid1
-      - selenoid2
+    ggr:
+      image: aerokube/ggr:1.7.2
+      hostname: ggr
+      depends_on:
+        - selenoid1
+        - selenoid2
+      volumes:
+        - "{{ selenoid_path }}/grid-router:/etc/grid-router:ro"
+      command: "-listen :4444 -guests-allowed -guests-quota test -verbose"
+      networks:
+        - selenoid1
+        - selenoid2
 
   nginx:
     image: nginx
