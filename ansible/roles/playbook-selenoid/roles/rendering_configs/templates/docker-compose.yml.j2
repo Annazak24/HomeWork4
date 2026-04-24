@@ -61,6 +61,20 @@ services:
     networks:
       - selenoid2
 
+  selenoid-ui:
+    image: aerokube/selenoid-ui:latest-release
+    container_name: selenoid-ui
+    ports:
+      - "9090:8080"
+    command:
+      - "--selenoid-uri"
+      - "http://ggr:4444"
+    depends_on:
+      - ggr
+    networks:
+      - selenoid1
+      - selenoid2
+
   ggr:
     image: aerokube/ggr:1.7.2
     hostname: ggr
